@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修真炼器录</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            grid-template-rows: 80px 1fr 60px;
+            height: 100vh;
+        }
+        
+        header {
+            grid-column: 1 / 4;
+            background-color: rgba(20, 20, 40, 0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 2px solid #4a3a28;
+        }
+        
+        .sidebar {
+            background-color: rgba(30, 30, 50, 0.7);
+            padding: 15px;
+            border-right: 1px solid #4a3a28;
+        }
+        
+        .main-content {
+            background-color: rgba(40, 40, 60, 0.6);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            background-color: rgba(30, 30, 50, 0.7);
+            padding: 15px;
+            border-left: 1px solid #4a3a28;
+        }
+        
+        footer {
+            grid-column: 1 / 4;
+            background-color: rgba(20, 20, 40, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 2px solid #4a3a28;
+        }
+        
+        .btn {
+            background: linear-gradient(to bottom, #6b5b3d, #4a3a28);
+            color: #f8e8c8;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to bottom, #8b7b5d, #6a5a48);
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            width: 50%;
+            transition: width 0.3s;
+        }
+        
+        .item-card {
+            background-color: rgba(50, 50, 70, 0.7);
+            border: 1px solid #6b5b3d;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .common { color: #ffffff; }
+        .uncommon { color: #1eff00; }
+        .rare { color: #0070ff; }
+        .epic { color: #a335ee; }
+        .legendary { color: #ff8000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>修真炼器录</h1>
+            <div class="player-info">
+                <span>等级: 15</span>
+                <span>金币: 12,450</span>
+                <span>灵石: 320</span>
+            </div>
+        </header>
+        
+        <div class="sidebar">
+            <h3>角色状态</h3>
+            <div>
+                <span>体力: 85/100</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 85%"></div>
+                </div>
+            </div>
+            
+            <h3>技能</h3>
+            <button class="btn">挖矿 (Lv.12)</button>
+            <button class="btn">炼器 (Lv.8)</button>
+            <button class="btn">战斗 (Lv.5)</button>
+            
+            <h3>导航</h3>
+            <button class="btn" onclick="showSection('mining')">挖矿</button>
+            <button class="btn" onclick="showSection('crafting')">炼器</button>
+            <button class="btn" onclick="showSection('auction')">拍卖行</button>
+            <button class="btn" onclick="showSection('quests')">任务</button>
+        </div>
+        
+        <div class="main-content" id="main-content">
+            <!-- 挖矿界面 -->
+            <div id="mining-section" class="game-section">
+                <h2>挖矿</h2>
+                <div class="mine-options">
+                    <button class="btn" onclick="startMining('copper')">铜矿脉 (Lv.1)</button>
+                    <button class="btn" onclick="startMining('iron')">铁矿脉 (Lv.5)</button>
+                    <button class="btn" onclick="startMining('silver')">银矿脉 (Lv.10)</button>
+                    <button class="btn" onclick="startMining('gold')">金矿脉 (Lv.15)</button>
+                </div>
+                <div id="mining-results"></div>
+            </div>
+            
+            <!-- 炼器界面 -->
+            <div id="crafting-section" class="game-section" style="display:none;">
+                <h2>炼器</h2>
+                <div>
+                    <h3>熔炼</h3>
+                    <select id="smelt-material">
+                        <option value="copper">铜矿石</option>
+                        <option value="iron">铁矿石</option>
+                        <option value="silver">银矿石</option>
+                    </select>
+                    <input type="number" id="smelt-amount" min="1" max="100" value="1">
+                    <button class="btn" onclick="smeltMaterials()">熔炼</button>
+                </div>
+                
+                <div>
+                    <h3>锻造</h3>
+                    <select id="forge-item">
+                        <option value="sword">长剑</option>
+                        <option value="axe">战斧</option>
+                        <option value="armor">护甲</option>
+                        <option value="helmet">头盔</option>
+                    </select>
+                    <button class="btn" onclick="forgeItem()">锻造</button>
+                    <div id="forge-result"></div>
+                </div>
+            </div>
+            
+            <!-- 拍卖行界面 -->
+            <div id="auction-section" class="game-section" style="display:none;">
+                <h2>拍卖行</h2>
+                <div>
+                    <input type="text" placeholder="搜索物品...">
+                    <select>
+                        <option>所有类别</option>
+                        <option>武器</option>
+                        <option>防具</option>
+                        <option>材料</option>
+                        <option>图纸</option>
+                    </select>
+                    <button class="btn">搜索</button>
+                </div>
+                
+                <div class="auction-list">
+                    <div class="item-card rare">
+                        <h4>寒冰剑 (稀有)</h4>
+                        <p>攻击力: 45-60 | 附加: 冰霜伤害+10</p>
+                        <p>价格: 2,500金币</p>
+                        <p>卖家: 剑仙李逍遥</p>
+                        <button class="btn">购买</button>
+                    </div>
+                    
+                    <div class="item-card">
+                        <h4>铁锭 x50 (普通)</h4>
+                        <p>价格: 800金币</p>
+                        <p>卖家: 矿工张三</p>
+                        <button class="btn">购买</button>
+                    </div>
+                    
+                    <div class="item-card epic">
+                        <h4>烈焰战甲图纸 (史诗)</h4>
+                        <p>需要炼器等级: 15</p>
+                        <p>价格: 5,000金币</p>
+                        <p>卖家: 炼器大师</p>
+                        <button class="btn">购买</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>我的拍卖</h3>
+                    <button class="btn" onclick="showSellForm()">出售物品</button>
+                    <div id="sell-form" style="display:none;">
+                        <select id="sell-item">
+                            <!-- 动态填充玩家物品 -->
+                        </select>
+                        <input type="number" id="sell-price" placeholder="价格">
+                        <button class="btn" onclick="listItem()">上架</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 任务界面 -->
+            <div id="quests-section" class="game-section" style="display:none;">
+                <h2>任务</h2>
+                <div class="quest-list">
+                    <div class="item-card">
+                        <h4>收集铜锭 (日常)</h4>
+                        <p>提交10个铜锭给铁匠铺</p>
+                        <p>奖励: 500金币, 100经验</p>
+                        <button class="btn">接受</button>
+                    </div>
+                    
+                    <div class="item-card">
+                        <h4>精良装备 (随机)</h4>
+                        <p>提交一件精良品质的武器</p>
+                        <p>奖励: 1,200金币, 炼器经验+50</p>
+                        <button class="btn">接受</button>
+                    </div>
+                    
+                    <div class="item-card">
+                        <h4>银矿危机 (悬赏)</h4>
+                        <p>击败银矿洞窟的岩石傀儡</p>
+                        <p>奖励: 2,000金币, 银矿开采权</p>
+                        <button class="btn">接受</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>我的任务</h3>
+                    <div class="item-card">
+                        <h4>收集铁锭 (进行中 3/10)</h4>
+                        <p>提交10个铁锭给铁匠铺</p>
+                        <button class="btn">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <h3>背包</h3>
+            <div class="inventory">
+                <div class="item-card">铜矿石 x42</div>
+                <div class="item-card">铁矿石 x18</div>
+                <div class="item-card uncommon">精铁锭 x5</div>
+                <div class="item-card rare">精钢长剑 x1</div>
+                <div class="item-card">金币 x12,450</div>
+            </div>
+            
+            <h3>装备</h3>
+            <div class="equipment">
+                <div>武器: 铁剑</div>
+                <div>护甲: 皮甲</div>
+                <div>头盔: 无</div>
+                <div>饰品: 无</div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>修真炼器录 © 2023 - 游戏进行中</p>
+        </footer>
+    </div>
+
+    <script>
+        // 游戏数据
+        const gameData = {
+            player: {
+                level: 15,
+                gold: 12450,
+                spiritStones: 320,
+                stamina: 85,
+                maxStamina: 100,
+                miningLevel: 12,
+                craftingLevel: 8,
+                combatLevel: 5,
+                inventory: [
+                    { id: 'copper_ore', name: '铜矿石', quantity: 42, rarity: 'common' },
+                    { id: 'iron_ore', name: '铁矿石', quantity: 18, rarity: 'common' },
+                    { id: 'iron_bar', name: '精铁锭', quantity: 5, rarity: 'uncommon' },
+                    { id: 'steel_sword', name: '精钢长剑', quantity: 1, rarity: 'rare' }
+                ],
+                equipment: {
+                    weapon: 'iron_sword',
+                    armor: 'leather_armor',
+                    helmet: null,
+                    accessory: null
+                },
+                activeQuests: [
+                    { id: 'quest_iron_bars', name: '收集铁锭', progress: 3, required: 10 }
+                ]
+            },
+            mines: {
+                copper: { name: '铜矿脉', levelReq: 1, staminaCost: 5, items: [
+                    { id: 'copper_ore', name: '铜矿石', chance: 80 },
+                    { id: 'tin_ore', name: '锡矿石', chance: 20 },
+                    { id: 'low_spirit_stone', name: '下品灵石', chance: 5 }
+                ]},
+                iron: { name: '铁矿脉', levelReq: 5, staminaCost: 8, items: [
+                    { id: 'iron_ore', name: '铁矿石', chance: 75 },
+                    { id: 'coal', name: '煤炭', chance: 25 },
+                    { id: 'medium_spirit_stone', name: '中品灵石', chance: 3 }
+                ]},
+                silver: { name: '银矿脉', levelReq: 10, staminaCost: 12, items: [
+                    { id: 'silver_ore', name: '银矿石', chance: 70 },
+                    { id: 'lead_ore', name: '铅矿石', chance: 15 },
+                    { id: 'medium_spirit_stone', name: '中品灵石', chance: 10 },
+                    { id: 'moonstone', name: '月长石', chance: 5 }
+                ]},
+                gold: { name: '金矿脉', levelReq: 15, staminaCost: 15, items: [
+                    { id: 'gold_ore', name: '金矿石', chance: 65 },
+                    { id: 'silver_ore', name: '银矿石', chance: 20 },
+                    { id: 'high_spirit_stone', name: '上品灵石', chance: 8 },
+                    { id: 'sunstone', name: '日长石', chance: 5 },
+                    { id: 'diamond', name: '金刚石', chance: 2 }
+                ]}
+            },
+            smeltingRecipes: {
+                copper: { input: 'copper_ore', output: 'copper_bar', inputAmount: 2, outputAmount: 1, xp: 5 },
+                iron: { input: 'iron_ore', output: 'iron_bar', inputAmount: 2, outputAmount: 1, xp: 10 },
+                silver: { input: 'silver_ore', output: 'silver_bar', inputAmount: 2, outputAmount: 1, xp: 15 }
+            },
+            forgingRecipes: {
+                sword: { 
+                    materials: [
+                        { id: 'iron_bar', amount: 3 },
+                        { id: 'coal', amount: 1 }
+                    ],
+                    results: [
+                        { name: '铁剑', rarity: 'common', chance: 70 },
+                        { name: '精铁剑', rarity: 'uncommon', chance: 25 },
+                        { name: '精钢长剑', rarity: 'rare', chance: 5 }
+                    ],
+                    xp: 20
+                },
+                axe: {
+                    materials: [
+                        { id: 'iron_bar', amount: 4 },
+                        { id: 'coal', amount: 1 }
+                    ],
+                    results: [
+                        { name: '铁斧', rarity: 'common', chance: 70 },
+                        { name: '精铁斧', rarity: 'uncommon', chance: 25 },
+                        { name: '精钢战斧', rarity: 'rare', chance: 5 }
+                    ],
+                    xp: 25
+                },
+                armor: {
+                    materials: [
+                        { id: 'iron_bar', amount: 5 },
+                        { id: 'leather', amount: 2 }
+                    ],
+                    results: [
+                        { name: '铁甲', rarity: 'common', chance: 70 },
+                        { name: '精铁甲', rarity: 'uncommon', chance: 25 },
+                        { name: '精钢护甲', rarity: 'rare', chance: 5 }
+                    ],
+                    xp: 30
+                }
+            },
+            quests: {
+                daily: [
+                    { 
+                        id: 'quest_copper_bars',
+                        name: '收集铜锭 (日常)',
+                        description: '提交10个铜锭给铁匠铺',
+                        requirements: [
+                            { id: 'copper_bar', amount: 10 }
+                        ],
+                        rewards: {
+                            gold: 500,
+                            xp: 100
+                        }
+                    }
+                ],
+                random: [
+                    { 
+                        id: 'quest_uncommon_weapon',
+                        name: '精良装备 (随机)',
+                        description: '提交一件精良品质的武器',
+                        requirements: [
+                            { type: 'weapon', rarity: 'uncommon', amount: 1 }
+                        ],
+                        rewards: {
+                            gold: 1200,
+                            craftingXp: 50
+                        }
+                    }
+                ],
+                bounty: [
+                    { 
+                        id: 'quest_rock_golem',
+                        name: '银矿危机 (悬赏)',
+                        description: '击败银矿洞窟的岩石傀儡',
+                        requirements: [
+                            { id: 'rock_golem_slained', amount: 1 }
+                        ],
+                        rewards: {
+                            gold: 2000,
+                            unlock: 'silver_mine_access'
+                        }
+                    }
+                ]
+            },
+            auctionItems: [
+                {
+                    id: 'frost_sword',
+                    name: '寒冰剑',
+                    type: 'weapon',
+                    rarity: 'rare',
+                    stats: '攻击力: 45-60 | 附加: 冰霜伤害+10',
+                    price: 2500,
+                    seller: '剑仙李逍遥'
+                },
+                {
+                    id: 'iron_bars_50',
+                    name: '铁锭 x50',
+                    type: 'material',
+                    rarity: 'common',
+                    stats: '',
+                    price: 800,
+                    seller: '矿工张三'
+                },
+                {
+                    id: 'flame_armor_blueprint',
+                    name: '烈焰战甲图纸',
+                    type: 'blueprint',
+                    rarity: 'epic',
+                    stats: '需要炼器等级: 15',
+                    price: 5000,
+                    seller: '炼器大师'
+                }
+            ]
+        };
+
+        // 游戏功能函数
+        function showSection(sectionId) {
+            document.querySelectorAll('.game-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(`${sectionId}-section`).style.display = 'block';
+        }
+
+        function startMining(mineType) {
+            const mine = gameData.mines[mineType];
+            const resultsDiv = document.getElementById('mining-results');
+            
+            if (gameData.player.stamina < mine.staminaCost) {
+                resultsDiv.innerHTML = '<p>体力不足！</p>';
+                return;
+            }
+            
+            if (gameData.player.miningLevel < mine.levelReq) {
+                resultsDiv.innerHTML = `<p>需要挖矿等级 ${mine.levelReq} 才能开采此矿脉！</p>`;
+                return;
+            }
+            
+            gameData.player.stamina -= mine.staminaCost;
+            updatePlayerStats();
+            
+            // 模拟挖矿结果
+            let obtainedItems = [];
+            mine.items.forEach(item => {
+                if (Math.random() * 100 < item.chance) {
+                    obtainedItems.push(item.name);
+                    
+                    // 添加到背包
+                    const existingItem = gameData.player.inventory.find(i => i.id === item.id);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        gameData.player.inventory.push({
+                            id: item.id,
+                            name: item.name,
+                            quantity: 1,
+                            rarity: item.rarity || 'common'
+                        });
+                    }
+                }
+            });
+            
+            if (obtainedItems.length === 0) {
+                resultsDiv.innerHTML = '<p>这次挖矿没有收获...</p>';
+            } else {
+                resultsDiv.innerHTML = `<p>挖矿获得: ${obtainedItems.join(', ')}</p>`;
+            }
+            
+            updateInventory();
+        }
+
+        function smeltMaterials() {
+            const material = document.getElementById('smelt-material').value;
+            const amount = parseInt(document.getElementById('smelt-amount').value);
+            const recipe = gameData.smeltingRecipes[material];
+            const forgeResultDiv = document.getElementById('forge-result');
+            
+            const inputItem = gameData.player.inventory.find(i => i.id === recipe.input);
+            if (!inputItem || inputItem.quantity < recipe.inputAmount * amount) {
+                forgeResultDiv.innerHTML = '<p>材料不足！</p>';
+                return;
+            }
+            
+            // 消耗材料
+            inputItem.quantity -= recipe.inputAmount * amount;
+            if (inputItem.quantity <= 0) {
+                gameData.player.inventory = gameData.player.inventory.filter(i => i.id !== recipe.input);
+            }
+            
+            // 获得成品
+            const outputItem = gameData.player.inventory.find(i => i.id === recipe.output);
+            if (outputItem) {
+                outputItem.quantity += recipe.outputAmount * amount;
+            } else {
+                gameData.player.inventory.push({
+                    id: recipe.output,
+                    name: recipe.output.replace('_', ' '),
+                    quantity: recipe.outputAmount * amount,
+                    rarity: 'common'
+                });
+            }
+            
+            // 获得经验
+            gameData.player.craftingLevel += recipe.xp * amount / 100;
+            
+            forgeResultDiv.innerHTML = `<p>成功熔炼 ${amount} 份 ${recipe.output.replace('_', ' ')}！</p>`;
+            updateInventory();
+            updatePlayerStats();
+        }
+
+        function forgeItem() {
+            const itemType = document.getElementById('forge-item').value;
+            const recipe = gameData.forgingRecipes[itemType];
+            const forgeResultDiv = document.getElementById('forge-result');
+            
+            // 检查材料
+            for (const material of recipe.materials) {
+                const invItem = gameData.player.inventory.find(i => i.id === material.id);
+                if (!invItem || invItem.quantity < material.amount) {
+                    forgeResultDiv.innerHTML = '<p>材料不足！</p>';
+                    return;
+                }
+            }
+            
+            // 消耗材料
+            for (const material of recipe.materials) {
+                const invItem = gameData.player.inventory.find(i => i.id === material.id);
+                invItem.quantity -= material.amount;
+                if (invItem.quantity <= 0) {
+                    gameData.player.inventory = gameData.player.inventory.filter(i => i.id !== material.id);
+                }
+            }
+            
+            // 随机决定锻造结果
+            const random = Math.random() * 100;
+            let cumulativeChance = 0;
+            let result;
+            
+            for (const possibleResult of recipe.results) {
+                cumulativeChance += possibleResult.chance;
+                if (random <= cumulativeChance) {
+                    result = possibleResult;
+                    break;
+                }
+            }
+            
+            // 添加到背包
+            const resultId = result.name.replace(/\s+/g, '_').toLowerCase();
+            const existingItem = gameData.player.inventory.find(i => i.id === resultId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                gameData.player.inventory.push({
+                    id: resultId,
+                    name: result.name,
+                    quantity: 1,
+                    rarity: result.rarity
+                });
+            }
+            
+            // 获得经验
+            gameData.player.craftingLevel += recipe.xp / 100;
+            
+            forgeResultDiv.innerHTML = `<p class="${result.rarity}">成功锻造 ${result.name} (${result.rarity})！</p>`;
+            updateInventory();
+            updatePlayerStats();
+        }
+
+        function showSellForm() {
+            const sellForm = document.getElementById('sell-form');
+            const sellItemSelect = document.getElementById('sell-item');
+            
+            sellItemSelect.innerHTML = '';
+            gameData.player.inventory.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.name} x${item.quantity}`;
+                sellItemSelect.appendChild(option);
+            });
+            
+            sellForm.style.display = 'block';
+        }
+
+        function listItem() {
+            const itemId = document.getElementById('sell-item').value;
+            const price = parseInt(document.getElementById('sell-price').value);
+            
+            if (!itemId || isNaN(price)) {
+                alert('请选择物品并设置价格');
+                return;
+            }
+            
+            const item = gameData.player.inventory.find(i => i.id === itemId);
+            if (!item) {
+                alert('物品不存在');
+                return;
+            }
+            
+            // 这里应该将物品添加到拍卖行列表，并从玩家背包移除
+            // 简化处理：直接从背包移除
+            item.quantity--;
+            if (item.quantity <= 0) {
+                gameData.player.inventory = gameData.player.inventory.filter(i => i.id !== itemId);
+            }
+            
+            gameData.player.gold += price; // 简化处理，实际应该等有人购买
+            alert(`已上架 ${item.name}，价格 ${price} 金币`);
+            
+            document.getElementById('sell-form').style.display = 'none';
+            updateInventory();
+            updatePlayerStats();
+        }
+
+        function updatePlayerStats() {
+            document.querySelector('.player-info span:nth-child(1)').textContent = `等级: ${Math.floor(gameData.player.level)}`;
+            document.querySelector('.player-info span:nth-child(2)').textContent = `金币: ${gameData.player.gold.toLocaleString()}`;
+            document.querySelector('.player-info span:nth-child(3)').textContent = `灵石: ${gameData.player.spiritStones}`;
+            
+            document.querySelector('.progress-fill').style.width = `${(gameData.player.stamina / gameData.player.maxStamina) * 100}%`;
+            document.querySelector('.sidebar button:nth-child(4)').textContent = `挖矿 (Lv.${Math.floor(gameData.player.miningLevel)})`;
+            document.querySelector('.sidebar button:nth-child(5)').textContent = `炼器 (Lv.${Math.floor(gameData.player.craftingLevel)})`;
+        }
+
+        function updateInventory() {
+            const inventoryDiv = document.querySelector('.inventory');
+            inventoryDiv.innerHTML = '';
+            
+            gameData.player.inventory.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `item-card ${item.rarity}`;
+                itemDiv.textContent = `${item.name} x${item.quantity}`;
+                inventoryDiv.appendChild(itemDiv);
+            });
+        }
+
+        // 初始化游戏
+        updatePlayerStats();
+        updateInventory();
+        showSection('mining');
+    </script>
+</body>
+</html>
